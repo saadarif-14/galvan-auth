@@ -50,7 +50,7 @@ npm run dev
 ##  Project Structure
 
 ```
-galvan-ai/
+galvan-auth/
 ├── backend/                 # Flask API Server
 │   ├── app.py              # Main Flask application
 │   ├── models.py           # Database models
