@@ -22,7 +22,7 @@ A comprehensive full-stack application for user and admin management with JWT au
 ### 1. Clone Repository
 ```bash
 git clone <repository-url>
-cd galvan-ai
+cd galvan-auth-master
 ```
 
 ### 2. Backend Setup
