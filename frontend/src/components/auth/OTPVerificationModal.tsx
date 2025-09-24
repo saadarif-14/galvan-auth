@@ -9,7 +9,6 @@ interface OTPVerificationModalProps {
   onClose: () => void;
   onVerify: (otp: string) => Promise<void>;
   userEmail: string;
-  loading?: boolean;
 }
 
 export default function OTPVerificationModal({
@@ -17,7 +16,6 @@ export default function OTPVerificationModal({
   onClose,
   onVerify,
   userEmail,
-  loading = false
 }: OTPVerificationModalProps) {
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
@@ -37,8 +35,8 @@ export default function OTPVerificationModal({
       await onVerify(otp);
       setOtp('');
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Invalid OTP code');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Invalid OTP code');
     } finally {
       setVerifying(false);
     }
@@ -104,7 +102,7 @@ export default function OTPVerificationModal({
                 </svg>
                 <div className="text-sm text-blue-800">
                   <p className="font-medium mb-1">Check your email</p>
-                  <p>The verification code has been sent to the user's email address. Please ask them to check their inbox and provide the code.</p>
+                  <p>The verification code has been sent to the user&apos;s email address. Please ask them to check their inbox and provide the code.</p>
                 </div>
               </div>
             </div>

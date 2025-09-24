@@ -4,7 +4,6 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { apiFetch } from '@/lib/api';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Label } from '@/components/ui/Label';
 import { Input } from '@/components/ui/Input';
@@ -37,9 +36,10 @@ export default function AdminLoginPage() {
 
       success('Login successful!', 'Welcome to the admin dashboard.');
       router.replace('/admin');
-    } catch (err: any) {
-      setError(err?.message || 'Login failed');
-      showError('Login failed', err?.message || 'Invalid credentials. Please try again.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setError(errorMessage);
+      showError('Login failed', errorMessage);
     } finally {
       setLoading(false);
     }

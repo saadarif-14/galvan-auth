@@ -12,7 +12,7 @@ export default function VerifyPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const [payload, setPayload] = useState<any | null>(null);
+  const [payload, setPayload] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -34,8 +34,8 @@ export default function VerifyPage() {
     try {
       await apiFetch("/auth/verify", { method: 'POST', body: JSON.stringify({ email, otp, payload }) });
       router.push('/login');
-    } catch (err: any) {
-      setError(err.message || 'Verification failed');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Verification failed');
     } finally {
       setLoading(false);
     }

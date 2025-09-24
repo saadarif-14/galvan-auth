@@ -23,8 +23,8 @@ export function AdminLoginModal({ open, onClose }: { open: boolean; onClose: () 
       if (typeof window !== 'undefined') localStorage.setItem('role', data.role);
       onClose();
       router.push('/admin');
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
       setLoading(false);
     }

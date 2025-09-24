@@ -1,6 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { apiFetch } from '@/lib/api';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -28,6 +29,23 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
   const { toasts, success, error: showError, removeToast } = useToast();
 
+  const loadUserProfile = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      // Get user profile from backend
+      const userData = await apiFetch<User>("/auth/profile");
+      setUser(userData);
+      success('Profile loaded successfully!', 'Welcome to your dashboard.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load profile';
+      setError(errorMessage);
+      showError('Profile loading failed', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [success, showError]);
+
   useEffect(() => {
     // Check if user is logged in
     if (!authManager.isAuthenticated() || !authManager.isUser()) {
@@ -37,23 +55,7 @@ export default function DashboardPage() {
     
     // Load user profile
     loadUserProfile();
-  }, []);
-
-  const loadUserProfile = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      // Get user profile from backend
-      const userData = await apiFetch<User>("/auth/profile");
-      setUser(userData);
-      success('Profile loaded successfully!', 'Welcome to your dashboard.');
-    } catch (err: any) {
-      setError(err.message || 'Failed to load profile');
-      showError('Profile loading failed', err.message || 'Unable to load your profile information.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [router, loadUserProfile]);
 
   const handleLogout = async () => {
     try {
@@ -125,10 +127,12 @@ export default function DashboardPage() {
                 {/* Profile Picture */}
                 <div className="flex-shrink-0">
                   {user?.profilePictureUrl ? (
-                    <img
+                    <Image
                       className="h-24 w-24 rounded-full object-cover border-4 border-white shadow-lg"
                       src={`http://localhost:5000${user.profilePictureUrl}`}
                       alt={`${user.firstName} ${user.lastName}`}
+                      width={96}
+                      height={96}
                       onError={(e) => {
                         // Fallback to initials if image fails to load
                         const target = e.target as HTMLImageElement;
@@ -246,14 +250,14 @@ export default function DashboardPage() {
                 🎉 Welcome to Galvan AI!
               </CardTitle>
               <CardDescription className="text-lg text-gray-700">
-                You're all set up and ready to go. Your account has been created and you can now access all the features of our platform.
+                You&apos;re all set up and ready to go. Your account has been created and you can now access all the features of our platform.
               </CardDescription>
             </CardHeader>
             <div className="p-6">
               <div className="bg-white rounded-lg p-4 shadow-sm">
                 <p className="text-gray-700">
-                  Thank you for joining Galvan AI! We're excited to have you on board. 
-                  If you have any questions or need assistance, please don't hesitate to reach out to our support team.
+                  Thank you for joining Galvan AI! We&apos;re excited to have you on board. 
+                  If you have any questions or need assistance, please don&apos;t hesitate to reach out to our support team.
                 </p>
               </div>
             </div>

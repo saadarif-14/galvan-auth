@@ -15,7 +15,7 @@ export default function Home() {
         router.replace('/dashboard');
       }
     }
-  }, []);
+  }, [router]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">

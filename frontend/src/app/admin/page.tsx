@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import OTPVerificationModal from '@/components/auth/OTPVerificationModal';
 import { useToast } from '@/hooks/useToast';
 import ToastContainer from '@/components/ui/ToastContainer';
@@ -46,9 +47,9 @@ export default function AdminPage() {
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>('');
   const [showOTPModal, setShowOTPModal] = useState(false);
-  const [pendingUserData, setPendingUserData] = useState<any>(null);
+  const [pendingUserData, setPendingUserData] = useState<{email: string; firstName: string; lastName: string; password: string; mobileNumber: string; role: string; profilePictureUrl: string} | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const { toasts, success: showSuccess, error: showError, removeToast } = useToast();
+  const { toasts, success: showSuccess, removeToast } = useToast();
 
   async function loadUsers() {
     setLoading(true);
@@ -56,8 +57,8 @@ export default function AdminPage() {
     try {
       const data = await apiFetch<User[]>("/admin/users");
       setUsers(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load users');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load users');
     } finally {
       setLoading(false);
     }
@@ -73,7 +74,7 @@ export default function AdminPage() {
     // Load users if authorized
     loadUsers();
     setIsAuthorized(true);
-  }, []);
+  }, [router]);
 
   const resetForm = () => {
     setForm({ firstName: '', lastName: '', email: '', password: '', mobileNumber: '', role: 'USER', profilePictureUrl: '' });
@@ -174,8 +175,8 @@ export default function AdminPage() {
         setShowOTPModal(true);
         showSuccess('OTP sent to user email!', 'Please verify the OTP to complete user creation.');
       }
-    } catch (err: any) {
-      setError(err.message || 'Operation failed');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Operation failed');
     } finally {
       setCreating(false);
     }
@@ -206,8 +207,8 @@ export default function AdminPage() {
       await apiFetch(`/admin/users/${id}`, { method: 'DELETE' });
       showSuccess('User deleted successfully!', 'The user has been removed from the system.');
       loadUsers();
-    } catch (err: any) {
-      setError(err.message || 'Delete failed');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Delete failed');
     }
   };
 
@@ -346,10 +347,12 @@ export default function AdminPage() {
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
                             {user.profilePictureUrl ? (
-                              <img
+                              <Image
                                 className="h-10 w-10 rounded-full object-cover border-2 border-gray-200"
                                 src={`http://localhost:5000${user.profilePictureUrl}`}
                                 alt={`${user.firstName} ${user.lastName}`}
+                                width={40}
+                                height={40}
                                 onError={(e) => {
                                   // Fallback to initials if image fails to load
                                   const target = e.target as HTMLImageElement;
@@ -547,10 +550,12 @@ export default function AdminPage() {
                   </div>
                   {profilePicturePreview && (
                     <div className="mt-2">
-                      <img
+                      <Image
                         src={profilePicturePreview}
                         alt="Profile preview"
                         className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                        width={64}
+                        height={64}
                       />
                     </div>
                   )}
@@ -594,7 +599,6 @@ export default function AdminPage() {
         }}
         onVerify={handleOTPVerification}
         userEmail={pendingUserData?.email || ''}
-        loading={creating}
       />
       
       <ToastContainer toasts={toasts} onRemoveToast={removeToast} />

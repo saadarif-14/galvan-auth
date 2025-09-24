@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { apiFetch } from '@/lib/api';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Label } from '@/components/ui/Label';
 import { Input } from '@/components/ui/Input';
@@ -30,9 +29,10 @@ export default function UserLoginPage() {
       }
       success('Login successful!', 'Welcome to your dashboard.');
       router.replace('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
-      showError('Login failed', err.message || 'Invalid credentials. Please try again.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setError(errorMessage);
+      showError('Login failed', errorMessage);
     } finally {
       setLoading(false);
     }

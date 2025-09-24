@@ -58,7 +58,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
         const text = await retryRes.text();
         return text ? JSON.parse(text) : ({} as T);
       }
-    } catch (error) {
+    } catch {
       // Refresh failed, user needs to login again
       authManager.logout();
       throw new Error('Session expired. Please login again.');

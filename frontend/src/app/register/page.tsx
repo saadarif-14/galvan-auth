@@ -1,16 +1,13 @@
 'use client';
 import { useState } from 'react';
-import { apiFetch } from '@/lib/api';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Label } from '@/components/ui/Label';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -18,7 +15,6 @@ export default function RegisterPage() {
     password: '',
     mobileNumber: '',
   });
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,7 +27,7 @@ export default function RegisterPage() {
     setLoading(false);
   };
 
-  const set = (k: string) => (e: any) => setForm({ ...form, [k]: e.target.value });
+  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });
 
   return (
     <div className="flex items-center justify-center p-4">
@@ -45,11 +41,10 @@ export default function RegisterPage() {
           <div className="space-y-2">
             <Label htmlFor="avatar">Profile picture</Label>
             {avatarPreview && (
-              <img src={avatarPreview} alt="Preview" className="h-16 w-16 rounded-full object-cover border" />
+              <Image src={avatarPreview} alt="Preview" className="h-16 w-16 rounded-full object-cover border" width={64} height={64} />
             )}
             <input id="avatar" type="file" accept="image/*" onChange={(e) => {
               const file = e.target.files?.[0] || null;
-              setAvatarFile(file);
               if (file) {
                 const url = URL.createObjectURL(file);
                 setAvatarPreview(url);
