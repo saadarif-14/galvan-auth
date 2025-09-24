@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
 import { useToast } from '@/hooks/useToast';
 import ToastContainer from '@/components/ui/ToastContainer';
-import { authManager } from '@/lib/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 type User = {
   id: number;
@@ -24,6 +24,7 @@ type User = {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { isAuthenticated, isUser, logout } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -48,18 +49,18 @@ export default function DashboardPage() {
 
   useEffect(() => {
     // Check if user is logged in
-    if (!authManager.isAuthenticated() || !authManager.isUser()) {
+    if (!isAuthenticated || !isUser) {
       router.replace('/user-login');
       return;
     }
     
     // Load user profile
     loadUserProfile();
-  }, [router, loadUserProfile]);
+  }, [router, loadUserProfile, isAuthenticated, isUser]);
 
   const handleLogout = async () => {
     try {
-      await authManager.logout();
+      await logout();
       success('Logged out successfully!', 'You have been logged out of your account.');
       router.replace('/');
     } catch (error) {

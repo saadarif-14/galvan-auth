@@ -12,10 +12,11 @@ import { Alert } from '@/components/ui/Alert';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
 import ToastContainer from '@/components/ui/ToastContainer';
-import { authManager } from '@/lib/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState(process.env.NEXT_PUBLIC_DEMO_ADMIN_EMAIL || '');
   const [password, setPassword] = useState(process.env.NEXT_PUBLIC_DEMO_ADMIN_PASSWORD || '');
   const [error, setError] = useState('');
@@ -28,7 +29,7 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const data = await authManager.login(email, password, 'admin');
+      const data = await login(email, password, 'admin');
 
       if (data.type !== 'admin') {
         throw new Error('Admin credentials required');

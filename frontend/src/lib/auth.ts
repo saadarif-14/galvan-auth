@@ -17,11 +17,13 @@ class AuthManager {
   private static instance: AuthManager;
   private user: AuthUser | null = null;
   private refreshPromise: Promise<AuthResponse> | null = null;
+  private listeners: Set<() => void> = new Set();
 
   private constructor() {
     // Initialize from server-side if available
     if (typeof window !== 'undefined') {
       this.loadUserFromStorage();
+      this.setupStorageListener();
     }
   }
 
@@ -44,6 +46,37 @@ class AuthManager {
     }
   }
 
+  private setupStorageListener(): void {
+    // Listen for storage changes (cross-tab synchronization)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'auth_user') {
+        if (e.newValue === null) {
+          // User logged out in another tab
+          this.user = null;
+          this.notifyListeners();
+        } else if (e.newValue) {
+          // User logged in in another tab
+          try {
+            this.user = JSON.parse(e.newValue);
+            this.notifyListeners();
+          } catch (error) {
+            console.error('Failed to parse auth data from storage:', error);
+          }
+        }
+      }
+    });
+  }
+
+  private notifyListeners(): void {
+    this.listeners.forEach(listener => listener());
+  }
+
+  // Add listener for auth state changes
+  addAuthListener(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
   private saveUserToStorage(user: AuthUser): void {
     try {
       localStorage.setItem('auth_user', JSON.stringify(user));
@@ -57,6 +90,7 @@ class AuthManager {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('auth_user');
     }
+    this.notifyListeners();
   }
 
   async login(email: string, password: string, userType: 'admin' | 'user'): Promise<AuthResponse> {
@@ -86,6 +120,7 @@ class AuthManager {
     };
     
     this.saveUserToStorage(this.user);
+    this.notifyListeners();
     return data;
   }
 
@@ -165,6 +200,31 @@ class AuthManager {
       return true;
     } catch (error) {
       console.error('Token refresh failed:', error);
+      this.clearAuth();
+      return false;
+    }
+  }
+
+  // Check if user has valid session without trying to refresh
+  async checkSession(): Promise<boolean> {
+    if (!this.isAuthenticated()) {
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000/api'}/auth/check`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        this.clearAuth();
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Session check failed:', error);
       this.clearAuth();
       return false;
     }

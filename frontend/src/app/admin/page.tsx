@@ -11,7 +11,7 @@ import Image from 'next/image';
 import OTPVerificationModal from '@/components/auth/OTPVerificationModal';
 import { useToast } from '@/hooks/useToast';
 import ToastContainer from '@/components/ui/ToastContainer';
-import { authManager } from '@/lib/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 type User = {
   id: number;
@@ -28,6 +28,7 @@ type User = {
 
 export default function AdminPage() {
   const router = useRouter();
+  const { isAuthenticated, isAdmin } = useAuth();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState('');
@@ -66,7 +67,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     // Check if user is admin
-    if (!authManager.isAuthenticated() || !authManager.isAdmin()) {
+    if (!isAuthenticated || !isAdmin) {
       router.replace('/admin-login');
       return;
     }
@@ -74,7 +75,7 @@ export default function AdminPage() {
     // Load users if authorized
     loadUsers();
     setIsAuthorized(true);
-  }, [router]);
+  }, [router, isAuthenticated, isAdmin]);
 
   const resetForm = () => {
     setForm({ firstName: '', lastName: '', email: '', password: '', mobileNumber: '', role: 'USER', profilePictureUrl: '' });
@@ -213,9 +214,11 @@ export default function AdminPage() {
   };
 
 
+  const { logout } = useAuth();
+  
   const handleLogout = async () => {
     try {
-      await authManager.logout();
+      await logout();
       router.replace('/');
     } catch (error) {
       console.error('Logout error:', error);

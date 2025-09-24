@@ -1,21 +1,22 @@
 'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authManager } from '@/lib/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Home() {
   const router = useRouter();
+  const { isAuthenticated, isAdmin, isUser } = useAuth();
 
   useEffect(() => {
     // Check if user is already logged in
-    if (authManager.isAuthenticated()) {
-      if (authManager.isAdmin()) {
+    if (isAuthenticated) {
+      if (isAdmin) {
         router.replace('/admin');
-      } else if (authManager.isUser()) {
+      } else if (isUser) {
         router.replace('/dashboard');
       }
     }
-  }, [router]);
+  }, [router, isAuthenticated, isAdmin, isUser]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">

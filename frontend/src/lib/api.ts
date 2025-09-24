@@ -22,9 +22,12 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
   const csrfCookieName = isRefresh ? "csrf_refresh_token" : "csrf_access_token";
   const csrf = needsCsrf(method) ? getCookie(csrfCookieName) : undefined;
 
-  // Ensure we have a valid token before making the request
+  // Check if we have a valid session before making the request
   if (authManager.isAuthenticated() && !isRefresh) {
-    await authManager.ensureValidToken();
+    const hasValidSession = await authManager.checkSession();
+    if (!hasValidSession) {
+      throw new Error('Session expired. Please login again.');
+    }
   }
 
   const res = await fetch(`${API_BASE}${path}`, {

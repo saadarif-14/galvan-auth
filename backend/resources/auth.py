@@ -201,9 +201,29 @@ class VerifyOTP(Resource):
             print(f"User {email} not found during OTP verification")
             return {"message": "User not found"}, 404
 
+
+class CheckSession(Resource):
+    @jwt_required()
+    def get(self):
+        """Check if the current session is valid"""
+        try:
+            current_user_id = get_jwt_identity()
+            claims = get_jwt()
+            
+            return {
+                "valid": True,
+                "user_id": current_user_id,
+                "role": claims.get("role"),
+                "type": claims.get("type")
+            }, 200
+        except Exception as e:
+            return {"message": "Invalid session", "valid": False}, 401
+
+
 api.add_resource(AdminLogin, '/admin-login')
 api.add_resource(UserLogin, '/user-login')
 api.add_resource(Refresh, '/refresh')
 api.add_resource(Logout, '/logout')
 api.add_resource(UserProfile, '/profile')
 api.add_resource(VerifyOTP, '/verify-otp')
+api.add_resource(CheckSession, '/check')

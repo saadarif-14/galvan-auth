@@ -8,10 +8,11 @@ import { Alert } from '@/components/ui/Alert';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
 import ToastContainer from '@/components/ui/ToastContainer';
-import { authManager } from '@/lib/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function UserLoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -23,7 +24,7 @@ export default function UserLoginPage() {
     setError('');
     setLoading(true);
     try {
-      const data = await authManager.login(email, password, 'user');
+      const data = await login(email, password, 'user');
       if (data.type !== 'user') {
         throw new Error('This login is for regular Users');
       }
