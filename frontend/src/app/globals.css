@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #1f2937; /* gray-800 for strong contrast */
+  --heading: #0f172a;   /* slate-900 */
+  --muted: #334155;     /* slate-700 */
+  --brand: #111111;     /* black brand */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  /* AI-themed background image with lighter overlay for clarity */
+  background-image: linear-gradient(rgba(255,255,255,0.6), rgba(255,255,255,0.6)), url('/ai-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Global typography tweaks for better contrast over the background */
+h1, h2, h3 {
+  color: var(--heading);
+}
+p, label, small, span {
+  color: var(--muted);
+}
+a { color: var(--brand); }
+a:hover { opacity: 0.85; }
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
